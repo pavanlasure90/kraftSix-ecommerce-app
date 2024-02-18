@@ -39,7 +39,7 @@ const Home = () => {
     <div className="">
       <Navbar />
       <input
-        style={{width:"90vw" , margin:"1rem" , border:"2px solid black"}}
+        style={{width:"90vw" , margin:"1rem" , border:"2px solid black", marginLeft:"1.8rem"}}
         type="text"
         placeholder="Search products..."
         value={searchTerm}
