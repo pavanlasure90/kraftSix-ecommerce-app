@@ -74,7 +74,7 @@ const addToCart = async () => {
 };
 
   return (
-    <div className="container">
+    <div className="">
       <Navbar />
       <h1 className="text-3xl font-bold mb-4 mt-4 ml-5" style={{ color: "purple" }}><i>Product Details</i></h1>
       {product && (
