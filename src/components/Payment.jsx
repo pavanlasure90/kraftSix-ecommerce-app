@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import GooglePayButton from "@google-pay/button-react";
-import Navbar from "./Navbar"; // Assuming Navbar is a component in a separate file
+import Navbar from "./Navbar"; 
 
 const PaymentPage = () => {
   const [isGooglePayLoaded, setIsGooglePayLoaded] = useState(false);
