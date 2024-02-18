@@ -1,25 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import Navbar from './Navbar';
 import { useNavigate } from 'react-router-dom';
+import { auth } from '../firebase';
 
 const Cart = () => {
   const [cartProducts, setCartProducts] = useState([]);
-  const navigate = useNavigate() 
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCartProducts = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, 'products'));
-        const products = [];
-        querySnapshot.forEach((doc) => {
-          products.push({ id: doc.id, ...doc.data() });
-        });
-        setCartProducts(products);
+        const user = auth.currentUser;
+        if (!user) {
+          console.log('User not authenticated');
+          return;
+        }
+
+        const userId = user.uid;
+        const userCartRef = doc(db, 'userCarts', userId);
+        const userCartDoc = await getDoc(userCartRef);
+        
+        if (userCartDoc.exists()) {
+          const userData = userCartDoc.data();
+          setCartProducts(userData.products || []);
+        } else {
+          console.log('User cart not found');
+          setCartProducts([]);
+        }
       } catch (error) {
-        console.error('Error fetching cart products:', error);
-      } 
+        console.error('Error fetching user cart:', error);
+      }
     };
 
     fetchCartProducts();
@@ -27,32 +39,43 @@ const Cart = () => {
 
   const removeFromCart = async (productId) => {
     try {
-      const productIdString = productId.toString();
-      // Delete the product document from Firestore
-      await deleteDoc(doc(db, 'products', productIdString));
+      const user = auth.currentUser;
+      if (!user) {
+        console.log('User not authenticated');
+        return;
+      }
+
+      const userId = user.uid;
+      const userCartRef = doc(db, 'userCarts', userId);
+      const userCartDoc = await getDoc(userCartRef);
       
-      // Update the UI by filtering out the removed product from cartProducts state
-      setCartProducts(prevProducts => prevProducts.filter(product => product.id !== productId));
-      console.log("Product removed from database");
+      if (userCartDoc.exists()) {
+        const userData = userCartDoc.data();
+        const updatedProducts = userData.products.filter(product => product.id !== productId);
+        await setDoc(userCartRef, { products: updatedProducts });
+        setCartProducts(updatedProducts);
+        console.log('Product removed from cart');
+      } else {
+        console.log('User cart not found');
+      }
     } catch (error) {
       console.error('Error removing product from cart:', error);
     }
   };
 
-  const handleBuyNow = () =>{
-    navigate('/payment')
-  }
-  
+  const handleBuyNow = () => {
+    navigate('/payment');
+  };
 
   return (
-    <div className="container">
+    <div className="">
       <Navbar />
-      <h1 className="text-3xl font-bold mb-4" style={{textAlign:"center"}}>Cart Items</h1>
+      <h1 className="text-3xl font-bold mb-4" style={{ textAlign: "center" }}>Cart Items</h1>
       {cartProducts.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4" style={{margin:"1.3rem"}}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4" style={{ margin: "1.3rem" }}>
           {cartProducts.map((product, index) => (
             <div key={index} className="border p-4">
-              <img src={product.thumbnail} alt="" className="w-full mb-2" />
+              <img src={product.thumbnail} alt="" className="w-small mb-2" />
               <h2 className="text-xl font-bold mb-2">{product.title}</h2>
               <p className="text-gray-600 mb-2">ID: {product.id}</p>
               <p className="text-black mb-2">Description: {product.description}</p>

@@ -40,7 +40,7 @@ const Home = () => {
   
 
   return (
-    <div className="container">
+    <div className="" >
       <Navbar />
       {/* <input
         type="text"

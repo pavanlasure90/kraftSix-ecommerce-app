@@ -2,14 +2,16 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
-import { addProductToFirestore } from '../firebase'; 
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase';
+import { auth } from '../firebase'; // Import the authentication module from your Firebase setup
+
 
 const ProductDetails = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [similarProducts, setSimilarProducts] = useState([]);
-  const [cart, setCart] = useState([]);
-  let navigate = useNavigate()
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -44,36 +46,47 @@ const ProductDetails = () => {
     }
   }, [id]);
 
-  const addToCart = () => {
-    if (product) {
-      const updatedCart = [...cart, product];
-      setCart(updatedCart);
 
-      // Store the product in Firestore
-      addProductToFirestore(product)
-        .then(() => {
-          console.log('Product added to Firestore');
-          alert("Product added to Cart")
-          navigate('/cart')
-        })
-        .catch((error) => {
-          console.error('Error adding product to Firestore:', error);
-        });
+const addToCart = async () => {
+  try {
+    const user = auth.currentUser; // Get the current user from Firebase Authentication
+    if (user && product) {
+      const userId = user.uid; // Get the user's ID
+      const cartRef = doc(db, 'userCarts', userId); // Reference to the user's cart document
+      const cartDoc = await getDoc(cartRef); // Retrieve the cart document from Firestore
+
+      if (cartDoc.exists()) {
+        // If the cart document already exists, update it with the new product
+        const cartData = cartDoc.data();
+        const updatedProducts = [...cartData.products, product]; // Add the new product to the existing products array
+        await setDoc(cartRef, { products: updatedProducts }, { merge: true }); // Merge the updated products array into the cart document
+      } else {
+        // If the cart document doesn't exist, create it with the new product
+        await setDoc(cartRef, { products: [product] }); // Create a new cart document with the new product
+      }
+      console.log('Product added to cart successfully');
+      alert("Product added to Cart");
+      navigate('/cart'); // Navigate to the cart page
+    } else {
+      console.error('User not logged in or product not found');
     }
-  };
+  } catch (error) {
+    console.error('Error adding product to cart:', error);
+  }
+};
 
   return (
     <div className="container">
       <Navbar />
-      <h1 className="text-3xl font-bold mb-4 mt-4 ml-5" style={{color:"purple"}}><i>Product Details</i></h1>
+      <h1 className="text-3xl font-bold mb-4 mt-4 ml-5" style={{ color: "purple" }}><i>Product Details</i></h1>
       {product && (
-        <div style={{margin:"1rem"}}>
+        <div style={{ margin: "1rem" }}>
           <img src={product.thumbnail} alt="" />
           <h2 className="text-xl font-bold mb-2">{product.title}</h2>
           <p className="text-gray-600 mb-2">ID: {product.id}</p>
           <p className="text-black mb-2">Description: {product.description}</p>
           <p className="text-purple-600 mb-2">Price: ${product.price}</p>
-          <button 
+          <button
             onClick={addToCart}
             className="text-gray-900 bg-gradient-to-r from-cyan-600 via-blue-300 to-purple-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-purple-100 dark:focus:ring-red-10 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
           >
@@ -100,10 +113,3 @@ const ProductDetails = () => {
 }
 
 export default ProductDetails;
-
-
-
-
-
-
-

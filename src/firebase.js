@@ -23,22 +23,6 @@ export const db = getFirestore(app);
 export default {app ,auth, db};
 
 
-// Function to add a product to the Firestore database
-export const addProductToFirestore = async (product) => {
-  try {
-    // Add a new document with a generated ID to the "products" collection
-    const docRef = await addDoc(collection(db, 'products'), product);
-    console.log('Product added with ID: ', docRef.id);
-    return docRef.id; // Return the ID of the added document
-  } catch (error) {
-    console.error('Error adding product: ', error);
-    return null; // Return null if there was an error
-  }
-};
-
-
-
-
 
 // Firestore database ID :   q3WW1JLlOrFKgicXfzKb
 
