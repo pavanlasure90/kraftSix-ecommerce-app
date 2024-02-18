@@ -4,7 +4,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { auth } from '../firebase'; // Import the authentication module from your Firebase setup
+import { auth } from '../firebase'; 
 
 
 const ProductDetails = () => {
@@ -49,24 +49,22 @@ const ProductDetails = () => {
 
 const addToCart = async () => {
   try {
-    const user = auth.currentUser; // Get the current user from Firebase Authentication
+    const user = auth.currentUser; 
     if (user && product) {
-      const userId = user.uid; // Get the user's ID
-      const cartRef = doc(db, 'userCarts', userId); // Reference to the user's cart document
-      const cartDoc = await getDoc(cartRef); // Retrieve the cart document from Firestore
+      const userId = user.uid; 
+      const cartRef = doc(db, 'userCarts', userId); 
+      const cartDoc = await getDoc(cartRef); 
 
       if (cartDoc.exists()) {
-        // If the cart document already exists, update it with the new product
         const cartData = cartDoc.data();
-        const updatedProducts = [...cartData.products, product]; // Add the new product to the existing products array
-        await setDoc(cartRef, { products: updatedProducts }, { merge: true }); // Merge the updated products array into the cart document
+        const updatedProducts = [...cartData.products, product]; 
+        await setDoc(cartRef, { products: updatedProducts }, { merge: true }); 
       } else {
-        // If the cart document doesn't exist, create it with the new product
-        await setDoc(cartRef, { products: [product] }); // Create a new cart document with the new product
+        await setDoc(cartRef, { products: [product] }); 
       }
       console.log('Product added to cart successfully');
       alert("Product added to Cart");
-      navigate('/cart'); // Navigate to the cart page
+      navigate('/cart'); 
     } else {
       console.error('User not logged in or product not found');
     }
