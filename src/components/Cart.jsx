@@ -20,7 +20,7 @@ const Cart = () => {
           alert("Please Login or Register")
           navigate("/")
           return;
-        }
+        } 
 
         const userId = user.uid;
         const userCartRef = doc(db, 'userCarts', userId);
@@ -98,7 +98,7 @@ const Cart = () => {
         const userData = userCartDoc.data();
         const updatedProducts = userData.products.map(product => {
           if (product.id === productId) {
-            const updatedQuantity = Math.max(1, newQuantity); // Ensure quantity is at least 1
+            const updatedQuantity = Math.max(1, newQuantity); 
             const updatedProduct = { ...product, quantity: updatedQuantity };
             return updatedProduct;
           }
@@ -160,9 +160,9 @@ const Cart = () => {
         <p>No items in cart</p>
       )}
       {cartProducts.length > 0 && (
-        <div className="text-right mt-4">
+        <div className="text-center mt-4 mb-10" > 
           <h2 className="text-2xl font-bold">Grand Total: ${grandTotal}</h2>
-          <StripePay grandTotal={grandTotal} clearCart={clearCart} /> {/* Render the CheckoutButton component with grandTotal */}
+          <StripePay grandTotal={grandTotal} clearCart={clearCart} /> 
         </div>
       )}
     </div>

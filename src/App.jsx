@@ -8,7 +8,6 @@ import 'tailwindcss/tailwind.css';
 import ProductDetails from './components/ProductDetails';
 import Navbar from './components/Navbar';
 import Cart from './components/Cart';
-import PaymentPage from './components/Payment';
 import Contact from './components/Contact';
 import CheckedOut from './components/CheckedOut';
 import CheckoutButton from './components/CheckoutButton';
@@ -24,7 +23,6 @@ function App() {
           <Route path='/product/:id' element={<ProductDetails />}/>
           <Route path='/cart' element={<Cart />} />
           <Route path='/contact' element={<Contact />}/>
-          <Route path='/payment' element={<PaymentPage />} />
           <Route path='/ordered' element={<CheckedOut />} />
           <Route path='/checkoutbutton' element={<CheckoutButton />} />
         </Routes>
