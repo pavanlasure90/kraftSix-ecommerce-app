@@ -64,7 +64,7 @@ const addToCart = async () => {
       }
       console.log('Product added to cart successfully');
       alert("Product added to Cart");
-      navigate('/cart'); 
+      navigate('/cart');  
     } else {
       console.error('User not logged in or product not found');
       alert("Please Login")
