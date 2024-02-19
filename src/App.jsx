@@ -11,6 +11,7 @@ import Cart from './components/Cart';
 import PaymentPage from './components/Payment';
 import Contact from './components/Contact';
 import CheckedOut from './components/CheckedOut';
+import CheckoutButton from './components/CheckoutButton';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route path='/contact' element={<Contact />}/>
           <Route path='/payment' element={<PaymentPage />} />
           <Route path='/ordered' element={<CheckedOut />} />
+          <Route path='/checkoutbutton' element={<CheckoutButton />} />
         </Routes>
     </AuthContextProvider>
   );

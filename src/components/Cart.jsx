@@ -4,6 +4,7 @@ import { db } from '../firebase';
 import Navbar from './Navbar';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../firebase';
+import StripePay from './CheckoutButton';
 
 const Cart = () => {
   const [cartProducts, setCartProducts] = useState([]);
@@ -16,23 +17,21 @@ const Cart = () => {
         const user = auth.currentUser;
         if (!user) {
           console.log('User not authenticated');
+          alert("Please Login or Register")
+          navigate("/")
           return;
         }
-    
+
         const userId = user.uid;
         const userCartRef = doc(db, 'userCarts', userId);
         const userCartDoc = await getDoc(userCartRef);
-        
+
         if (userCartDoc.exists()) {
           const userData = userCartDoc.data();
-          console.log('Fetched cart data:', userData.products); 
-          
           const productsWithQuantity = userData.products.map(product => ({
             ...product,
-            quantity: typeof product.quantity === 'number' ? product.quantity : 1, 
+            quantity: typeof product.quantity === 'number' ? product.quantity : 1,
           }));
-          console.log('Products with quantity:', productsWithQuantity); 
-          
           setCartProducts(productsWithQuantity);
         } else {
           console.log('User cart not found');
@@ -68,7 +67,7 @@ const Cart = () => {
       const userId = user.uid;
       const userCartRef = doc(db, 'userCarts', userId);
       const userCartDoc = await getDoc(userCartRef);
-      
+
       if (userCartDoc.exists()) {
         const userData = userCartDoc.data();
         const updatedProducts = userData.products.filter(product => product.id !== productId);
@@ -83,10 +82,6 @@ const Cart = () => {
     }
   };
 
-  const handleBuyNow = () => {
-    navigate('/payment');
-  };
-
   const handleQuantityChange = async (productId, newQuantity) => {
     try {
       const user = auth.currentUser;
@@ -94,17 +89,16 @@ const Cart = () => {
         console.log('User not authenticated');
         return;
       }
-  
+
       const userId = user.uid;
       const userCartRef = doc(db, 'userCarts', userId);
       const userCartDoc = await getDoc(userCartRef);
-  
+
       if (userCartDoc.exists()) {
         const userData = userCartDoc.data();
         const updatedProducts = userData.products.map(product => {
           if (product.id === productId) {
             const updatedQuantity = Math.max(1, newQuantity); // Ensure quantity is at least 1
-            console.log('New quantity:', updatedQuantity); // Log new quantity
             const updatedProduct = { ...product, quantity: updatedQuantity };
             return updatedProduct;
           }
@@ -119,8 +113,26 @@ const Cart = () => {
       console.error('Error updating product quantity:', error);
     }
   };
-  
-  
+
+
+  const clearCart = async () => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        console.log('User not authenticated');
+        return;
+      }
+
+      const userId = user.uid;
+      const userCartRef = doc(db, 'userCarts', userId);
+      await setDoc(userCartRef, { products: [] }); 
+      setCartProducts([]);
+      console.log('Cart cleared');
+    } catch (error) {
+      console.error('Error clearing cart:', error);
+    }
+  };
+
   return (
     <div className="">
       <Navbar />
@@ -135,20 +147,12 @@ const Cart = () => {
               <p className="text-black mb-2">Description: {product.description}</p>
               <p className="text-purple-600 mb-2">Price: ${product.price}</p>
               <div className="flex items-center">
-              <button onClick={() => {
-  const newQuantity = product.quantity - 1;
-  console.log('New Quantity:', newQuantity);
-  handleQuantityChange(product.id, newQuantity);
-}} className="bg-gray-200 text-gray-700 px-2 py-1 rounded-l hover:bg-gray-300">-</button>
+                <button onClick={() => handleQuantityChange(product.id, product.quantity - 1)} className="bg-gray-200 text-gray-700 px-2 py-1 rounded-l hover:bg-gray-300">-</button>
                 <div className="border border-gray-300 rounded-md px-3 py-2 mx-2">{product.quantity || 1}</div>
-                <button onClick={() => {
-  const newQuantity = product.quantity + 1;
-  console.log('New Quantity:', newQuantity);
-  handleQuantityChange(product.id, newQuantity);
-}} className="bg-gray-200 text-gray-700 px-2 py-1 rounded-r hover:bg-gray-300">+</button>              </div>
+                <button onClick={() => handleQuantityChange(product.id, product.quantity + 1)} className="bg-gray-200 text-gray-700 px-2 py-1 rounded-r hover:bg-gray-300">+</button>
+              </div>
               <p>Total Price: ${product.price * (product.quantity || 1)}</p>
               <button onClick={() => removeFromCart(product.id)} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 mr-2 mt-2">Remove</button>
-              <button onClick={handleBuyNow} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2">Buy Now</button>
             </div>
           ))}
         </div>
@@ -158,6 +162,7 @@ const Cart = () => {
       {cartProducts.length > 0 && (
         <div className="text-right mt-4">
           <h2 className="text-2xl font-bold">Grand Total: ${grandTotal}</h2>
+          <StripePay grandTotal={grandTotal} clearCart={clearCart} /> {/* Render the CheckoutButton component with grandTotal */}
         </div>
       )}
     </div>

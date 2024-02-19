@@ -18,7 +18,6 @@ export const AuthContextProvider = ({ children }) => {
     const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider)
       .then((result) => {
-        // Navigate to home page after signing in successfully
         navigate('/home');
       })
       .catch((error) => {
@@ -50,3 +49,4 @@ export const AuthContextProvider = ({ children }) => {
 export const useAuth = () => {
   return useContext(AuthContext);
 };
+

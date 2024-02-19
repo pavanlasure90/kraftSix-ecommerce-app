@@ -67,6 +67,7 @@ const addToCart = async () => {
       navigate('/cart'); 
     } else {
       console.error('User not logged in or product not found');
+      alert("Please Login")
     }
   } catch (error) {
     console.error('Error adding product to cart:', error);
